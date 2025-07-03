@@ -12,8 +12,8 @@ abstract class BaseViewModel<S : UIState, in E : UIEvent> : ViewModel() {
     open val uiState: StateFlow<S>
         get() = _uiState
 
-    protected fun updateUiState(newState: (S) -> S) {
-        _uiState.update(newState)
+    protected fun updateUiState(newState: S) {
+        _uiState.update { newState }
     }
 
     abstract fun onEvent(event: E)

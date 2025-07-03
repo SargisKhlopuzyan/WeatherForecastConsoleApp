@@ -40,7 +40,7 @@ android {
 dependencies {
     implementation(projects.domain)
 
-    // Note navigation
+    // navigation
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.core.ktx)
@@ -56,10 +56,6 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
-
-    // Additional icons
-//    implementation(libs.androidx.material.icons.extended.android)
-//    implementation(libs.androidx.ui.tooling)
 
     // Injection Koin
     implementation(libs.koin.android)

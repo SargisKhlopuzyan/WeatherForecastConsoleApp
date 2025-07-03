@@ -1,9 +1,7 @@
 package com.sargis.khlopuzyan.domain.di
 
 import com.sargis.khlopuzyan.domain.usecase.GetCityListUseCase
-import com.sargis.khlopuzyan.domain.usecase.GetCityListUseCaseImpl
 import com.sargis.khlopuzyan.domain.usecase.GetCityWeatherUseCase
-import com.sargis.khlopuzyan.domain.usecase.GetCityWeatherUseCaseImpl
 import com.sargis.khlopuzyan.domain.usecase.UnitsMeasurementUseCase
 import com.sargis.khlopuzyan.domain.usecase.UnitsMeasurementUseCaseImpl
 import com.sargis.khlopuzyan.domain.util.temperature.TemperatureConverter
@@ -15,8 +13,8 @@ import com.sargis.khlopuzyan.domain.util.wind.WindSpeedConverterImpl
 import org.koin.dsl.module
 
 private val useCaseModule = module {
-    single<GetCityWeatherUseCase> { GetCityWeatherUseCaseImpl(get()) }
-    single<GetCityListUseCase> { GetCityListUseCaseImpl(get()) }
+    single<GetCityWeatherUseCase> { GetCityWeatherUseCase(get()) }
+    single<GetCityListUseCase> { GetCityListUseCase(get()) }
     single<UnitsMeasurementUseCase> { UnitsMeasurementUseCaseImpl() }
 }
 

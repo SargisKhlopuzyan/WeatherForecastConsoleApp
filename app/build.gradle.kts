@@ -37,7 +37,6 @@ android {
     buildFeatures {
         compose = true
     }
-
 }
 
 dependencies {
@@ -46,26 +45,13 @@ dependencies {
     implementation(projects.presentation)
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.runner)
+    implementation(libs.androidx.activity.compose)
 
     // Injection Koin
     implementation(libs.koin.android)
 
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.runner)
-
-//    implementation(libs.androidx.lifecycle.runtime.ktx)
-//    implementation(libs.androidx.activity.compose)
-//    implementation(platform(libs.androidx.compose.bom))
-//    implementation(libs.androidx.ui)
-//    implementation(libs.androidx.ui.graphics)
-//    implementation(libs.androidx.ui.tooling.preview)
-//    implementation(libs.androidx.material3)
-
-//    testImplementation(libs.junit)
+    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
-//    androidTestImplementation(libs.androidx.espresso.core)
-//    androidTestImplementation(platform(libs.androidx.compose.bom))
-//    androidTestImplementation(libs.androidx.ui.test.junit4)
-//    debugImplementation(libs.androidx.ui.tooling)
-//    debugImplementation(libs.androidx.ui.test.manifest)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -7,6 +7,10 @@ import com.sargis.khlopuzyan.domain.usecase.UnitsMeasurementUseCase
 import com.sargis.khlopuzyan.domain.util.Result
 import com.sargis.khlopuzyan.presentation.base.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(
@@ -15,8 +19,15 @@ class WeatherViewModel(
     private val unitsMeasurementUseCase: UnitsMeasurementUseCase,
 ) : BaseViewModel<WeatherUiState, WeatherUiEvent>() {
 
-    override val _uiState: MutableStateFlow<WeatherUiState> = MutableStateFlow<WeatherUiState>(
-        WeatherUiState()
+    override val _uiState: MutableStateFlow<WeatherUiState> =
+        MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
+
+    override val uiState: StateFlow<WeatherUiState> = _uiState.onStart {
+        fetchWeatherInfo()
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        WeatherUiState.Loading
     )
 
     override fun onEvent(event: WeatherUiEvent) {
@@ -25,40 +36,24 @@ class WeatherViewModel(
         }
     }
 
-    init {
-        fetchWeatherInfo()
-    }
-
-    fun fetchWeatherInfo() {
+    private fun fetchWeatherInfo() {
         viewModelScope.launch {
-            updateUiState {
-                it.copy(
-                    isLoading = true,
-                    shoError = false
-                )
-            }
-            val result = getCityWeatherUseCase.getCityWeather(cityId)
+            updateUiState(WeatherUiState.Loading)
+            val result = getCityWeatherUseCase(cityId)
 
             when (result) {
                 is Result.Error<WeatherInfo> -> {
-                    updateUiState {
-                        it.copy(
-                            shoError = true,
-                            isLoading = false
-                        )
-                    }
+                    updateUiState(WeatherUiState.Error)
                 }
 
                 is Result.Success<WeatherInfo> -> {
-                    updateUiState {
-                        it.copy(
-                            shoError = false,
-                            isLoading = false,
+                    updateUiState(
+                        WeatherUiState.Success(
                             temperatureUnit = unitsMeasurementUseCase.getTemperatureUnit(),
                             windSpeedUnit = unitsMeasurementUseCase.getWindSpeedUnit(),
                             weatherInfo = result.data
                         )
-                    }
+                    )
                 }
             }
         }

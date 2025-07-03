@@ -14,13 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.sargis.khlopuzyan.presentation.ui.DisplayTimeFormatHelper
+import com.sargis.khlopuzyan.presentation.ui.common.AppToolBar
 import com.sargis.khlopuzyan.presentation.ui.theme.WeatherForecastConsoleAppTheme
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalTime
@@ -32,14 +33,26 @@ fun WeatherScreen(
     viewModel: WeatherViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    Weather(uiState, onTryAgain = {
+    Weather(navController, uiState, onTryAgain = {
         viewModel.onEvent(WeatherUiEvent.TryAgain)
     })
 }
 
 @Composable
-fun Weather(uiState: WeatherUiState, onTryAgain: () -> Unit) {
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+private fun Weather(navController: NavController, uiState: WeatherUiState, onTryAgain: () -> Unit) {
+    Scaffold(
+        topBar = {
+            val title = if (uiState is WeatherUiState.Success) {
+                "Weather for ${uiState.weatherInfo?.name ?: ""}"
+            } else {
+                "Weather detail"
+            }
+            AppToolBar(title) {
+                navController.popBackStack()
+            }
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -47,19 +60,17 @@ fun Weather(uiState: WeatherUiState, onTryAgain: () -> Unit) {
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            if (uiState.isLoading) {
-                Loading()
-            } else if (uiState.shoError) {
-                Error(onTryAgain)
-            } else if (uiState.weatherInfo != null) {
-                WeatherInfo(uiState)
+            when (uiState) {
+                WeatherUiState.Error -> Error(onTryAgain)
+                WeatherUiState.Loading -> Loading()
+                is WeatherUiState.Success -> WeatherInfo(uiState)
             }
         }
     }
 }
 
 @Composable
-fun Loading() {
+private fun Loading() {
     Text(
         style = MaterialTheme.typography.titleMedium,
         text = "Loading..."
@@ -67,7 +78,7 @@ fun Loading() {
 }
 
 @Composable
-fun Error(onTryAgain: () -> Unit) {
+private fun Error(onTryAgain: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -89,19 +100,11 @@ fun Error(onTryAgain: () -> Unit) {
 }
 
 @Composable
-fun WeatherInfo(uiState: WeatherUiState) {
+private fun WeatherInfo(uiState: WeatherUiState.Success) {
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            style = MaterialTheme.typography.titleLarge,
-            color = Color.Black,
-            text = "Weather for ${uiState.weatherInfo?.name}"
-        )
         WeatherItem("WeatherInfo", "${uiState.weatherInfo?.weatherInfo?.first()}")
         WeatherItem("Pressure", "${uiState.weatherInfo?.pressure}")
         WeatherItem("Humidity", "${uiState.weatherInfo?.humidity}")
@@ -128,7 +131,7 @@ fun WeatherInfo(uiState: WeatherUiState) {
     }
 }
 
-fun Double.round(decimals: Int): Double {
+private fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
     repeat(decimals) { multiplier *= 10 }
     return round(this * multiplier) / multiplier
@@ -144,7 +147,7 @@ private fun getFormattedTime(localTime: LocalTime?): AnnotatedString {
 }
 
 @Composable
-fun WeatherItem(label: String, value: String) {
+private fun WeatherItem(label: String, value: String) {
     Row {
         Text(
             modifier = Modifier
@@ -152,7 +155,6 @@ fun WeatherItem(label: String, value: String) {
                 .padding(vertical = 8.dp),
             text = "$label : $value",
             style = MaterialTheme.typography.titleMedium,
-            color = Color.DarkGray,
         )
     }
 }
@@ -161,6 +163,6 @@ fun WeatherItem(label: String, value: String) {
 @Composable
 fun WeatherScreenPreview() {
     WeatherForecastConsoleAppTheme {
-        Weather(WeatherUiState(isLoading = true), onTryAgain = {})
+        Weather(rememberNavController(), WeatherUiState.Loading, onTryAgain = {})
     }
 }

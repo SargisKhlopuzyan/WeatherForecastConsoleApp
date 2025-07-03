@@ -34,8 +34,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
 
     // Injection Koin
     implementation(libs.koin.android)

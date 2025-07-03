@@ -4,14 +4,10 @@ import com.sargis.khlopuzyan.domain.entity.WeatherInfo
 import com.sargis.khlopuzyan.domain.repository.WeatherRepository
 import com.sargis.khlopuzyan.domain.util.Result
 
-interface GetCityWeatherUseCase {
-    suspend fun getCityWeather(cityId: Long): Result<WeatherInfo>
-}
-
-class GetCityWeatherUseCaseImpl(
+class GetCityWeatherUseCase(
     private val repository: WeatherRepository,
-) : GetCityWeatherUseCase {
-    override suspend fun getCityWeather(cityId: Long): Result<WeatherInfo> {
+) {
+    suspend operator fun invoke(cityId: Long): Result<WeatherInfo> {
         return repository.getWeatherDataForCityId(cityId)
     }
 }
